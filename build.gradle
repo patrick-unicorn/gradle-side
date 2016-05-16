@@ -7,26 +7,81 @@
  * user guide available at https://docs.gradle.org/2.7/userguide/tutorial_java_projects.html
  */
 
-/*
-// Apply the java plugin to add support for Java
 apply plugin: 'java'
 
-// In this section you declare where to find the dependencies of your project
+// 指定编译的java版本，要求系统变量JAVA_HOME中配置必须至少高于jdk1.7版本。
+sourceCompatibility = 1.7
+targetCompatibility = 1.7
+
+// 此处的变量为project内置的属性，如果需要扩展属性，可以放在ext块中
+version = '1.0'
+description = 'A Test Case by Unicorn'
+
+ext {
+    /* 扩展变量，相当于project.springVersion */
+    springVersion = "4.2.6.RELEASE"
+}
+
 repositories {
-    // Use 'jcenter' for resolving your dependencies.
-    // You can declare any Maven/Ivy/file repository here.
-    jcenter()
+    mavenCentral()
 }
 
-// In this section you declare the dependencies for your production and test code
 dependencies {
-    // The production code uses the SLF4J logging API at compile time
-    compile 'org.slf4j:slf4j-api:1.7.12'
+    // 特别注意： 此处不能用单引号
+    // 等价于：compile("org.springframework:spring-core:" + $springVersion)
+    compile "org.springframework:spring-core:$springVersion"
 
-    // Declare the dependency for your favourite test framework you want to use in your tests.
-    // TestNG is also supported by the Gradle Test task. Just change the
-    // testCompile dependency to testCompile 'org.testng:testng:6.8.1' and add
-    // 'test.useTestNG()' to your build script.
-    testCompile 'junit:junit:4.12'
+    testCompile group: 'junit', name: 'junit', version: '4.+'
 }
+
+/** 定制Jar task, 修改MANIFEST.MF文件*/
+jar {
+    manifest {
+        attributes 'Implementation-Title': 'Gradle Quickstart', 'Implementation-Version': version
+    }
+}
+
+/*
+    [gradle基础][http://wiki.jikexueyuan.com/project/deep-android-gradle/three-two.html]
+
+    Groovy 中，变量或函数定义可以使用关键字 def
+
+    最后一行代码的执行结果就是本函数的返回值，return不必需
+
+    函数定义时，参数的类型和返回值类型可以不指定
+
+    单引号''中的内容严格对应 Java 中的 String，不对$符号进行转义
+
+    双引号""的内容则和脚本语言的处理有点像，如果字符中有$号的话，则它会$表达式先求值。
+
+    三个引号'''xxx'''中的字符串支持随意换行，类似python、c#（中的@"")
+
+    Groovy 中函数调用的时候还可以不加括号
+
+    int，boolean 这些 Java 中的基本数据类型，在 Groovy 代码中其实对应的是它们的包装数据类型。
+
+    Groovy 中的容器类很简单，就三种：
+
+        List：链表，其底层对应 Java 中的 List 接口，一般用 ArrayList 作为真正的实现类。
+            def aList = [5,'string',true] //List 由[]定义，其元素可以是任何对象 
+
+        Map：键-值表，其底层对应 Java 中的 LinkedHashMap。
+            def aMap = ['key1':'value1','key2':true] 
+
+        Range：范围，它其实是 List 的一种拓展。
+            def aRange = 1..5  // 包含[1, 5]
+            def aRange = 1..<5 // 包含[1, 5)
 */
+
+// 自定义函数：动态获取git的数字版本号
+def gitVersion() {
+    def cmd = 'git rev-list HEAD --first-parent --count'
+    def verison = cmd.execute().text.trim().toInteger()
+
+    return verison;
+}
+
+task printGitVersion << {
+    println gitVersion()
+}
+
