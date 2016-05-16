@@ -19,7 +19,7 @@ description = 'A Test Case by Unicorn'
 
 ext {
     /* 扩展变量，相当于project.springVersion */
-    springVersion = "4.2.6.RELEASE"
+    springVersion = '4.2.6.RELEASE'
 }
 
 repositories {
