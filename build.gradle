@@ -7,6 +7,13 @@
  * user guide available at https://docs.gradle.org/2.7/userguide/tutorial_java_projects.html
  */
 
+// gradle2.1之后引入的plugin portal dependency方式
+// 注意该模块放的位置： only buildscript {} and other plugins {} script blocks 
+//                   are allowed before plugins {} blocks, no other statements are allowed
+plugins {
+    id 'org.ajoberstar.grgit' version '1.4.2'
+}
+
 apply plugin: 'java'
 
 // 指定编译的java版本，要求系统变量JAVA_HOME中配置必须至少高于jdk1.7版本。
@@ -27,6 +34,10 @@ repositories {
 }
 
 dependencies {
+    // 在gradle2.1以前的配置插件的方式，classpath在此处所表达的意思是
+    // 该依赖被脚本自身所依赖
+    // classpath 'org.ajoberstar:gradle-git:<version>'
+
     // 特别注意： 此处不能用单引号
     // 等价于：compile("org.springframework:spring-core:" + $springVersion)
     compile "org.springframework:spring-core:$springVersion"
@@ -83,5 +94,19 @@ def gitVersion() {
 
 task printGitVersion << {
     println gitVersion()
+}
+
+// 自定义函数：动态获取git commit id
+import org.ajoberstar.grgit.*
+
+def getVersionWithGitCommitId() {
+    def repo = Grgit.open(project.file('.'))
+    version = "1.0.0-${repo.head().abbreviatedId}"
+
+    return version
+}
+
+task printGitCommitVerison << {
+    println getVersionWithGitCommitId()
 }
 
